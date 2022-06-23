@@ -1,0 +1,184 @@
+---
+title: "HW 2 448"
+output: pdf_document
+---
+
+#1
+
+In Table 3.4, the null hypothesis for "Tv" is in the presence of radio
+ads and newspaper ads, TV ads have no effect on sales. The null
+hypothesis for "radio" is in the presence of TV and newspaper ads. 
+Just like Tv, radio ads have no effect on sales. The low p-value of 
+TV and radio suggest to reject the null hypothesis for TV and radio. 
+Contrast, the high p-value of newspaper suggests that we accept the null 
+hypothesis for newspaper.
+
+#3
+X1 = GPA, X2 = IQ, X3 = Level (1 for College and 0 for High School) 
+X4 = Interaction between GPA and IQ, and X5 = Interaction between GPA and Level.
+
+yhat -> salary = 50 + 20*GPA + .07*IQ + 35*level +.01*GPA*IQ - 10*GPA*level
+
+level = 1 #college grads 
+yhat = 85 + 10*GPA + .07*IQ + .01*GPA*IQ
+
+level = 0 #highschool 
+yhat = 50 + 20*GPA + .07*IQ + .01*GPA*IQ
+
+##a. 
+
+(iii.) Leading coefficient for GPA is 20 for highschoolers as compared to 10  
+for college graduates. 
+
+##b.
+
+salary = 85 + 10(4) + .07(110) + .01(4)(110)
+salary = 137.1 
+137.1 * 1000  #salary in thousands
+= $137,100
+###salary for college student IQ of 110 and GPA 4.0 is $137,100
+
+##c. 
+False, we must look at the p-value of the regression coefficient to
+determine if the interaction term is significant or not. We cannot say an 
+interaction effect is significant based on looking at the interaction value.
+
+#10
+```{r}
+
+library(ISLR)
+
+##a. 
+summary(Carseats)
+attach(Carseats)
+lm.fit = lm(Sales ~ Price + Urban + US)
+summary(lm.fit)
+
+```
+##b. 
+P-val is significant for relationship between Price and Sales. Coefficient for 
+Price states a negative relationship between Price and Sales. As price increase,
+sales decrease. 
+
+P-val not significant for relationship of location and Sales. 
+
+P-val is significant for relationship between US store and Sales. Coefficient 
+indicated positive relationship, if store is in US, sales increase by approx. 
+1201 units. (1.2005*1000). Multiply by 1000 because "unit sales in 1000's". 
+
+##c. 
+Sales = 13.04 - .05(Price) - .02(UrbanYes) + 1.2(USYes)
+
+##d. 
+We can reject the null hypothesis for the Price and USYes Predicators because of 
+their low P-values. 
+
+##e. 
+```{r}
+lm.2fit = lm(Sales ~ Price + US)
+summary(lm.2fit)
+
+```
+##f. 
+Based on the R^2 value, both part a and part e models fit the data similarly,
+though model e fits slightly better for the data. Both a and e models however, 
+have low R^2 values. 
+
+##g.
+```{r}
+confint(lm.2fit) #95% confidence interval for model e
+```
+
+##h.
+```{r}
+par(mfrow=c(2,2))
+plot(lm.2fit)
+plot(predict(lm.2fit), rstudent(lm.2fit)) #using standardized residual
+plot(hatvalues(lm.2fit)) #hatvalues is a leverage statistics
+which.max(hatvalues(lm.2fit)) #the point with the largest leverage
+```
+
+#13
+```{r}
+set.seed(1)
+
+#a. 
+x = rnorm(100)
+
+#b.
+eps = rnorm(100, 0, sqrt(.25))
+
+#c. 
+y = -1 + .5*x + eps
+length(y)
+#Length is 100, beta 0 is -1 and beta 1 is .5 based from equation
+
+#d. 
+plot(x,y) 
+#positive linear relationship between x and y. As x increases, y also increases.
+
+#e. 
+lm.3fit = lm(y ~ x)
+summary(lm.3fit)
+
+#lm fits close to actual value of coefficients. P - val is significant and for 
+###the positive relationship between x and y.
+
+#f. 
+plot(x,y)
+abline(lm.3fit, col = "purple" )
+abline(-1,.5, col = "orange")
+legend(x = "topleft", legend = c("model", "Regression"), col = c(2,3),
+       lwd = 2)
+
+#g. 
+lm.4fit = lm(y ~ x + I(x^2)) #I means we are creating a quadratic function
+summary(lm.4fit)
+
+##Slight increase in R^2 value indicates there is evidence that quadratic term
+###improves the model fit, though p-val indicates no relationship between y and 
+###x^2. 
+
+#h. 
+set.seed(1)
+eps1 = rnorm(100, 0, .125)
+x1 = rnorm(100)
+y1 = -1 + .5*x1 + eps1
+plot(x1,y1)
+lm.5fit = lm(y1 ~ x1)
+summary(lm.5fit)
+
+abline(lm.5fit, col=2)
+abline(-1, 0.5, col=3)
+legend(-1, legend = c("model fit", "regression"), col=2:3, lwd = 3)
+
+#Changing the variance, changes the noise in the data. Reducing variance, 
+##lessens the noise. 
+
+#i.
+set.seed(1)
+eps2 = rnorm(100, 0, 0.85)
+x2 = rnorm(100)
+y2 = -1 + 0.5*x2 + eps2
+plot(x2, y2)
+lm.6fit = lm(y2~x2)
+summary(lm.6fit)
+
+abline(lm.6fit, col="red")
+abline(-1, 0.5, col="blue")
+legend(-1, legend = c("model fit", "regression"), lwd=3)
+
+#By increasing the variance, we are essentially increasing the noise. 
+
+#j. 
+confint(lm.3fit)
+confint(lm.6fit)
+confint(lm.5fit)
+##less noiser data has narrower CI as compared to noiser and default. Intervals
+###seem to be centered around .5. 
+```
+
+
+
+
+

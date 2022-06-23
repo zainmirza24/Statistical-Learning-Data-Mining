@@ -1,0 +1,146 @@
+---
+title: "Ch. 4 HW 3 448"
+output:
+  pdf_document: default
+  html_document: default
+---
+#13
+```{r}
+install.packages("ISLR2",  repos = "http://cran.us.r-project.org")
+library(ISLR2)
+summary(Weekly)
+
+#a.
+pairs(Weekly)
+cor(Weekly[, -9])
+##Year + Volume have a relationship within one another. No other patterns appear
+
+#b. 
+attach(Weekly)
+glm.fit = glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, 
+              data = Weekly, family = binomial)
+summary(glm.fit)
+##Lag 2 has a significant P-val. above .03
+
+#c.
+glm.probs = predict(glm.fit, type = "response")
+glm.pred = rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] = "Up"
+table(glm.pred, Direction)
+#Number of correct = .561 or 56.1%. Logistic regression prediction percentage
+#for "up" is 92.1%. "... down" is 11.2% accurate, which is significantly 
+#lower
+
+#d. 
+train = (Year < 2009)
+Weekly.train = Weekly[!train, ]
+glm.fit = glm(Direction ~ Lag2, data = Weekly, family = binomial, 
+              subset = train)
+glm.probs = predict(glm.fit, Weekly.train, type = "response")
+glm.pred = rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] = "Up"
+Direction.train = Direction[!train]
+table(glm.pred, Direction.train)     #DOUBLE CHECK WITH P MAN
+
+
+#e. 
+install.packages("MASS",  repos = "http://cran.us.r-project.org")
+library(MASS)
+lda.fit = lda(Direction ~ Lag2, data = Weekly, subset = train)
+lda.pred = predict(lda.fit, Weekly.train)
+table(lda.pred$class, Direction.train)      #ChECK WITH P MAN
+
+#f. 
+qda.fit = qda(Direction ~ Lag2, data = Weekly, subset = train)
+qda.class = predict(qda.fit, Weekly.train)$class
+table(qda.class, Direction.train)
+
+mean(qda.class == Direction.train)
+#accurate only 58.7% of the time. Based on results it seems it only chose "up".
+
+#g.
+install.packages("class",  repos = "http://cran.us.r-project.org")
+library(class)
+train.Z = as.matrix(Lag2[train])
+test.Z = as.matrix(Lag2[!train])
+train.Dir = Direction[train]
+set.seed(1)
+knn.pred = knn(train.Z, test.Z, train.Dir, k = 1)
+table(knn.pred, Direction.train)
+
+#h. 
+install.packages("e1071", repos = "http://cran.us.r-project.org")
+library (e1071)
+nb.fit = naiveBayes(Direction ~ Lag2, data = Weekly, family = binomial)
+nb.class = predict(nb.fit, Weekly.train)
+table(nb.class, Direction.train)
+
+mean(nb.class == Direction.train)
+
+#i. + j. 
+##LR with Lag2:Lag1
+glm.fit = glm(Direction ~ Lag2:Lag1, data = Weekly, family = binomial, 
+              subset = train)
+glm.probs = predict(glm.fit, Weekly.train, type = "response")
+glm.pred = rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] = "Up"
+Direction.train = Direction[!train]
+table(glm.pred, Direction.train)
+
+##LDA with Lag2 interaction w/ Lag1
+lda.fit = lda(Direction ~ Lag2:Lag1, data = Weekly, subset = train)
+lda.pred = predict(lda.fit, Weekly.train)
+
+##QDA with sqrt(abs(Lag2))
+qda.fit = qda(Direction ~ Lag2 + sqrt(abs(Lag2)), data = Weekly, subset = train)
+qda.class = predict(qda.fit, Weekly.train)$class
+table(qda.class, Direction.train)
+
+##KNN @ k =10
+knn.pred = knn(train.Z, test.Z, train.Dir, k = 10)
+table(knn.pred, Direction.train)
+
+
+##KNN @ k = 100
+knn.pred = knn(train.Z, test.Z, train.Dir, k = 100)
+table(knn.pred, Direction.train)
+
+#Based from these, Logistic Regression + Naive Bayes' allow for better 
+#performance based on the test error rates for each. 
+```
+
+
+#15
+```{r}
+#a.
+Power = function() 
+  {2^3}
+print(Power())
+
+#b. 
+Power2 = function(x, a) 
+  {x^a}
+Power2(3, 8)
+
+#c. 
+Power2(10, 3)
+Power2(8, 17)
+Power2(131, 3)
+
+#d.
+Power3 = function(x, a) 
+  {result = x^a
+  return(result)}
+
+#e.
+x = 1:10
+plot(x, Power3(x, 2), log = "xy", ylab = "Log of y = x^2", xlab = "Log of x", 
+    main = "Log of x^2 vs. Log of x")
+
+#f.
+PlotPower = function(x, a) 
+  {plot(x, Power3(x, a))}
+PlotPower(1:10, 3)
+
+```
+
