@@ -1,5 +1,5 @@
 # Statistical-Learning-Data-Mining
-HW/Exam code from 'An Introduction to Statistical Learning with Applications in R' 2nd Edition  
+HW/Exam code from 'An Introduction to Statistical Learning with Applications in R' 2nd Edition textbook
 <p align="left">
 
 <!-- For more icons please follow  https://github.com/MikeCodesDotNET/ColoredBadges -->
