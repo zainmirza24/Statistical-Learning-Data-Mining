@@ -1,0 +1,185 @@
+---
+title: "HW 1 448"
+output:
+  pdf_document: default
+---
+
+##2a)This question is a regression problem, because we are looking at predicting a numerical value. We are most interested in inference for this problem.n = 500 and p = 3 (profit, number of employees, and industry)
+
+##b)This question is a classification problem, because we are looking at predicting a non-numeric categorical value. We are most interest in 
+ # prediction. 
+ #n = 20 
+ #p = 13 (price charged, marketing budget, competition price, +10 others)
+
+##c) 
+##This question is a regression because we are looking at the percent change, 
+ # which is a numerical value. We are most interested in predicting for the % 
+ # change 
+ # n = 52 (weeks in a year for the year 2012)
+ # p = 4 (USD/EURO, USD, GB, and Germany % change)
+
+
+
+
+#4a) 
+### Spam email class example: Response is Yes or No for Spam. 
+ #Predictors: How many characters in the email (key words)
+ #inference because we are making conclusions based on existing data/evidence
+### Should an applicant be accepted into SFSU: Response is Admitted or Not 
+  #Admitted. Predictors include: GPA, SAT Scores, Applicant Essay. The goal is 
+  #prediction. 
+### Covid Vaccination status to enter an arena/event is another example of 
+  #classification. The response is vaccinated versus unvaccinated. Predictors 
+  #can include whether they have their vaccine card or not. The goal is 
+  #prediction for this scenario because we do not have previous data and we are 
+  #predicting for a y.
+
+##b) 
+### Predicting Sales for a quarter/year. Using last year's data to create a 
+  #prediction on this year's data. The response is a numerical value that is
+  #somewhat close to the last year data. Our predictors can be many different
+  #things, it all depends on the company service?product/etc. This is a 
+  #prediction because we are using multiple different factors to predict a y. 
+### Predicting the value of a stock price. The response is also a numerical 
+  #value that is either higher or lower than what we predict. Predictors for
+  # the stock market can include: inflation rate, overall economy, etc.
+  #This is also a prediction problem because we are predicting for some var. y. 
+### The last example in which we can use regression is predicting the true 
+  #value of a home. We can use past data and current data to predict the price. 
+  # The response variable is the price of the home. Some predictors include: 
+  # location, square footage, inflation rate, etc. Similar to the previous 2 
+  # reasonings, this is also a prediction problem. 
+
+##c)
+### One real life application for using cluster analysis can be for determining 
+  #natural disasters: Learning about different regions that are affected 
+  #we can determine such danger zones, awaring the public of a possible threat. 
+###Another example is for clustering is used in Cities. Understanding Carbon 
+  #footprint we can identify which areas/zones are high in CO2. 
+###One final example for using cluster analysis is City construction. 
+  #We can identify certain regions and locations, allowing companies to 
+  #establish a proper price for each value. 
+
+
+#8
+```{r}
+#a
+college = read.csv("College.csv")
+
+
+#b
+rownames = college[, 1]
+View(college)
+
+college1 = college[, -1]
+View(college1)
+
+#c
+summary(college1)
+college1$Private = as.factor(college1$Private)
+pairs(college1[,1:10])
+
+plot(college1$Private, college1$Outstate)
+
+Elite = rep("No", nrow(college1))
+Elite[college1$Top10perc > 50] = "Yes"
+Elite = as.factor(Elite)
+college1 = data.frame(college1, Elite)
+summary(college1$Elite)  #78 Elite Universities 
+plot(college1$Elite, college1$Outstate) #box-plot
+
+par(mfrow = c(2,2))
+hist(college1$Apps, main = "Number of Applications")
+hist(college1$Personal, main = "Personal Cost")
+hist(college1$Books, main = " Book Cost")
+hist(college1$Grad.Rate, main = "Graduation Rate (%)")
+
+plot(college1$Grad.Rate, college1$Outstate, xlab = "Grad Rate", 
+     ylab = "OS tuition", col = "blue")
+##The higher the Out of state tuition fees, the higher the graduation rate.
+  #This gives indication that students are more likely to graduate if their
+  #tuition fees are higher. This can equate to nursing majors, medical majors. 
+  #Even tech majors today which require a lot more schooling than other jobs.
+```
+
+
+#10
+```{r}
+##a
+#install.packages('ISLR2', repos = "http://cran.us.r-project.org")
+library(ISLR2)
+colnames(Boston)
+str(Boston)
+#There are 506 rows and 13 columns. The rows represent the suburbs of Boston. 
+  #The columns represent the predictors. For example, per capita crime rate by 
+  #town, proportion of non-retail business acres per town, nitrogen oxide 
+  #concentration, etc. 
+
+##b
+library(ISLR2)
+
+pairs(Boston)
+
+par(mfrow = c(2,2))
+plot(Boston$indus, Boston$crim)
+plot(Boston$rm, Boston$medv, col = "blue")
+plot(Boston$age, Boston$ptratio)
+
+##Based on these 3 plots, we can see as rm increases, so does the medv. 
+
+##c
+par(mfrow = c(2,2))
+
+plot(Boston$age, Boston$crim)
+##As the proportion of owner-occupied units built prior to 1940 increase, 
+  #so does the crime rate. 
+plot(Boston$lstat, Boston$crim)
+##As lower status of the population (percent) increase, we see an increase in 
+  #the crime rate
+plot(Boston$medv, Boston$crim)
+##We see that crime rate is much higher in the lower median value of 
+  #owner-occupied homes in $1000s. 
+
+##d
+
+hist(Boston$crim, main = "Hist. of per capita crime rate", xlab = "Crime Rate",
+     ylab = "Freq.")
+###From the above histogram, we see that Boston has some high crime rates.
+hist(Boston$tax, main = "Hist. of full-value property-tax rate", ylab = "Freq.")
+###From this histogram we can see that some areas in Boston have a higher tax
+  # than others. 
+hist(Boston$ptratio)
+###Some suburbs in Boston have more teachers than others. This can be true due 
+  # some areas having a higher population than others, thus a need for more
+  # teachers.
+
+##e
+#install.packages("tidyverse")
+library(tidyverse)
+charles.river = filter(Boston, chas ==1 )
+count(charles.river) #There are a total 35 suburbs that bound the Charles River
+
+##f
+summary(Boston$ptratio) #The median ratio for pupil-teachers is roughly about 19
+
+##g
+library(tidyverse)
+#arrange(Boston, medv) ; (DID NOT KNIT THIS, PRINTS 20+ PAGES of DATA)  
+###The lowest median value (5) has a crime rate of 38.35%, and an lstat of 30.59.
+ # It is also clear to see that these values are higher than their average. 
+
+##h
+###average more than 7: 
+LJ = filter(Boston, rm > 7)
+length(LJ$rm) # 64 suburbs average more than 7 rooms per dwelling. 
+
+###average more than 8:
+LJ1 = filter(Boston, rm > 8)
+length(LJ1$rm) # only 13 suburbs average more than 8 rooms per dwelling. 
+
+summary(LJ1) # of the 13 suburbs, they have an average crime rate of 71.9%. 
+  #the teacher ratio has an average mean of 16.36. The average 
+  #median value of owner-occupied homes in $1000s is 44.2 (roughly $44,000)
+
+```
+
