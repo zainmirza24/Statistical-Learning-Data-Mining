@@ -1,0 +1,161 @@
+---
+title: "Ch. 5 HW 448"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+#3) Review k-fold cross-validation. 
+(a)  Explain how k-fold cross-validation is implemented. 
+•	K-fold cross validation is inserted by taking the set of z observations and 
+randomly cutting into k groups which are none overlapped. All these groups 
+continuously act as a validation set and the remainder as a training set. The 
+test error is conducted by the k-resulted MSE estimates
+(b)  What are the advantages and disadvantages of k-fold cross-validation 
+     relative to:
+i. The validation set approach? 
+•	The validation set approach is interpretated as implementing the existing 
+training data set into two sets. The disadvantages include that the test error 
+estimate is highly dependent on the training and the validation sets. Another 
+may be that the validation set error rate can over-estimate the test error rate. 
+Thus leading to an inaccurate model fit. 
+ii. LOOCV? 
+•	This is a special type of k-fold cross-validation but with k = z. This model 
+has a method which allows the model to be always fit. However, it is quite a 
+nifty computational method to generate. The LOOCV includes a lower bias, but a 
+higher variance as a setback in comparison to the k-fold cross validation. 
+
+#5
+```{r}
+
+install.packages('ISLR', repos = "http://cran.us.r-project.org")
+library(ISLR)
+
+#a)
+summary(Default)
+
+set.seed(1)
+glm.fit = glm(default ~ income + balance, data = Default, family = binomial)
+
+#b) 
+
+myfunction = function() {
+    # i.
+    train = sample(dim(Default)[1], dim(Default)[1]/2)
+   
+     # ii.
+    glm.fit1 = glm(default ~ income + balance, data = Default, family = binomial, 
+        subset = train)
+    
+    # iii.
+    glm.pred = rep("No", dim(Default)[1]/2)
+    glm.probs1 = predict(glm.fit1, Default[-train, ], type = "response")
+    glm.pred[glm.probs1 > 0.5] = "Yes"
+    
+    # iv.
+    return(mean(glm.pred != Default[-train, ]$default))
+}
+myfunction()
+
+#test error rate is about 2.54 from the validation set approach. 
+
+#c) 
+
+myfunction()
+
+myfunction()
+
+myfunction()
+
+#There appears to be an average error rate ranging on average from 2.4 - 2.8 %.
+
+#d)
+
+train = sample(dim(Default)[1], dim(Default)[1]/2)
+
+glm.fit2 = glm(default ~ income + balance + student, data = Default, 
+               family = binomial, subset = train)
+glm.pred = rep("No", dim(Default)[1]/2)
+glm.probs2 = predict(glm.fit2, Default[-train, ], type = "response")
+glm.pred[glm.probs2 > 0.5] = "Yes"
+
+mean(glm.pred != Default[-train, ]$default)
+
+#By including a dummy variable such as student, we are not reducing the test
+##error rate as it still remains the same.  
+```
+#6
+```{r}
+#a)
+
+set.seed(1)
+glm.fit = glm(default ~ income + balance, data = Default, family = binomial)
+summary(glm.fit)
+
+#The coefficient for the int. is -1.194e+01,the coefficient for income is 
+##3.2362e-05, and the coefficient for balance is 5.689e-03.
+
+#b)
+
+boot.fn = function(data, index) return(coef(glm(default ~ income + balance, 
+    data = data, family = binomial, subset = index)))
+
+#c)
+
+library(boot)
+boot(Default, boot.fn, 100)
+
+#bootstrap estimation of SE(standard error) for b0 is 4.38e-01, b1 is 4.84e-06, 
+##b2 is 2.327e-04.
+
+```
+##d) 
+
+Using the glm() function and the bootstrap function for standard error both 
+attain similar non-identical values. Because they are so close in values 
+to eachother, we cannot conclude one is better than the other for providing a 
+MOST accurate SE.
+
+
+#7
+```{r}
+
+summary(Weekly)
+set.seed(1)
+attach(Weekly)
+
+#a)
+
+glm.fit1 = glm(Direction ~ Lag1 + Lag2, data = Weekly, family = binomial)
+summary(glm.fit1)
+
+#b) 
+
+glm.fit2 = glm(Direction ~ Lag1 + Lag2, data = Weekly[-1, ], family = binomial)
+summary(glm.fit2)
+
+#c)
+
+predict.glm(glm.fit2, Weekly[1, ], type = "response") > 0.5
+
+#The prediction was DOWN, as is the first direction for the first obs. is DOWN.
+
+#d)
+
+myloop = rep(0, dim(Weekly)[1])
+for (i in 1:(dim(Weekly)[1])) {
+    glm.fit = glm(Direction ~ Lag1 + Lag2, data = Weekly[-i, ], 
+                   family = binomial)
+    is.up = predict.glm(glm.fit, Weekly[i, ], type = "response") > 0.5
+    is.true.up = Weekly[i, ]$Direction == "Up"
+    if (is.up != is.true.up) 
+        myloop[i] = 1
+}
+sum(myloop) #490 total errors 
+
+#e)
+
+mean(myloop)
+#LOOCV test error rate is about .45 or 45% 
+```
+

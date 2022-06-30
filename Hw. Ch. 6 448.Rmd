@@ -1,0 +1,128 @@
+---
+title: "HW Ch. 6 448"
+output:
+  pdf_document: default
+  html_document: default
+---
+#1. 
+##a Which of the three models with k predictors has the smallest training RSS?
+  Best subset = smallest training RSS because other methods come with a path 
+  dependency to determine models .
+##b. Which of the three models with k predictors has the smallest test RSS?
+  Best subest selection because it considers more models than the other methods. 
+  Although other methods mmay consider a model that is more fitting for the test 
+  data. 
+##c.True or False:
+  i:The predictors in the k-variable model identified by forward stepwise are a 
+  subset of the predictors in the (k+1)-variable model identified by forward 
+  stepwise selection.
+    TRUE
+  ii. The predictors in the k-variable model identified by backward stepwise are 
+  a subset of the predictors in the (k + 1) - variable model identified by 
+  backward stepwise selection.
+    TRUE
+  iii. The predictors in the k-variable model identified by backward stepwise 
+  are a subset of the predictors in the (k + 1) - variable model identified 
+  by forward stepwise selection.
+    FALSE
+  iv. The predictors in the k-variable model identified by forward stepwise are
+  a subset of the predictors in the (k+1)-variable model identified by backward 
+  stepwise selection.
+    FALSE
+  v. The predictors in the k-variable model identified by best subset are a 
+  subset of the predictors in the (k + 1)-variable model identified by best 
+  subset selection.
+    FALSE
+
+#2. 
+##a. The lasso, relative to least squares, is:
+  iii - Less flexible and hence will give improved prediction accuracy when its 
+  increase in bias is less than its decrease in variance.
+##b. Repeat (a) for ridge regression relative to least squares.
+  iii - Same as LASSO from the given options in the text. 
+##c. Repeat (a) for non-linear methods relative to least squares.
+  ii - More flexible and hence will give improved prediction accuracy when its 
+  increase in variance is less than its decrease in bias.
+
+  
+  
+  
+  
+  
+  
+#9. 
+```{r}
+install.packages("ISLR", repos = "https://cran.rstudio.com")
+library(ISLR)
+
+#a.
+train = sample(1:dim(College)[1],dim(College)[1]/2)
+test = -train
+College.train = College[train, ]
+College.test = College[test, ]
+
+set.seed(42)
+sum(is.na(College))
+
+Apps_train <- College.train[,"Apps"]
+Apps_test <- College.test[,"Apps"]
+
+#b.
+lm.fit = lm(Apps~., data = College.train)
+lm.pred = predict(lm.fit, College.test)
+mean((College.test[, "Apps"] - lm.pred)^2)
+###test RSS is 1341776
+
+#c.
+ install.packages("glmnet", repos = "https://cran.rstudio.com")
+library(glmnet)
+train.mat = model.matrix(Apps~., data=College.train)
+test.mat = model.matrix(Apps~., data=College.test)
+grid = 10 ^ seq(4, -2, length = 100)
+mod.ridge = cv.glmnet(train.mat, College.train$Apps, alpha=0, lambda=grid, 
+thresh = 1e-12)
+lambda.best = mod.ridge$lambda.min
+lambda.best
+ridge.pred = predict(mod.ridge, newx=test.mat, s=lambda.best)
+mean((College.test$Apps - ridge.pred)^2)
+###test RSS is slightly larger at 1462449 compared to least squares. 
+
+#d. 
+lasso.mod = cv.glmnet(train.mat, College.train[, "Apps"], alpha=1, lambda=grid, 
+                      thresh = 1e-12)
+lambda.best = lasso.mod$lambda.min
+lambda.best
+
+l.pred = predict(lasso.mod, newx = test.mat, s = lambda.best)
+mean((College.test[, "Apps"] - l.pred)^2)
+###test RSS is 1219829, smaller than both the least squares and the ridge reg. 
+
+#e. 
+ install.packages("pls", repos = "https://cran.rstudio.com")
+library(pls)
+pcr_fit = pcr(Apps~., data=College.train, scale = TRUE, validation="CV")
+summary(pcr_fit)
+
+validationplot(pcr_fit, val.type = "MSEP")
+
+pcr.pred = predict(pcr_fit, College.test, ncomp=16)
+pc.mean = mean((pcr.pred - Apps_test)^2)
+pc.mean
+###RSS is for PCR 26499648, much larger compared to the other 3 models. 
+
+#f. 
+pls_fit = plsr(Apps~., data = College.train, scale = TRUE, validation="CV")
+summary(pls_fit)
+
+validationplot(pls_fit, val.type = "MSEP")
+
+pls_pred = predict(pls_fit, College.test, ncomp = 9)
+pl_mean = mean((pls_pred - Apps_test)^2)
+pl_mean
+###RSS is 26619335 for PLS.
+
+```
+
+##g. 
+  All models have comparible RSS values. It's best to find which model(s) have a 
+  higher R^2 value. 
